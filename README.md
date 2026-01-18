@@ -42,7 +42,7 @@ One of the core features is the **Retention Policy**. In the configuration menu,
 Go to **Settings** → **Devices & Services** → **Add Integration** and search for **Entity & Attribute Logger**.
 
 ### Step 2: Select Entities
-During the setup, you can select which entities you want to track. The logger will automatically start recording state changes to `/config/entity_attribute_logger/`.
+During the setup, you can select which entities you want to track. The logger will automatically start recording state changes to `/config/www/entity_and_attribute_logger/`.
 1 file per "Entry", even when multiple entities are used, this way you can combine logging for better analysis.
 
 ### Step 3: Usage in Automations (Optional)
@@ -51,4 +51,4 @@ If you want to feed the logged data into an AI model (like Gemma), you can use a
 ```yaml
 # configuration.yaml example
 shell_command:
-  get_ai_history: "cat /config/entity_attribute_logger/device_tracker_bjorn.json"
+  get_ai_history: "cat /config/www/entity_and_attribute_logger/**filename.json**"
