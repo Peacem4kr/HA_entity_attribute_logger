@@ -10,10 +10,9 @@ This integration is designed to bridge the gap between Home Assistant's state ma
 
 ## Features
 
-- **Full Attribute Logging**: Captures not just the state, but every single attribute of an entity.
+- **Full Attribute Logging**: Captures not just the state, but every single attribute of an entity, free to choose.
 - **AI-Ready Output**: Generates a clean JSON string optimized for LLM tokenization.
 - **Shell Integration**: Can be triggered via a shell command for use in complex automations.
-- **Custom Branding**: Includes a dedicated icon and logo for a seamless look in the Home Assistant UI.
 
 ## Requirements
 
