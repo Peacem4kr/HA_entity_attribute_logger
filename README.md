@@ -1,4 +1,4 @@
-**Entity & Attribute Logger for Home Assistant**
+# Entity & Attribute Logger for Home Assistant
 This custom component allows you to log specific entity states and their attributes to a JSON format. It is specifically designed to feed historical data into AI models (like Google Gemma or OpenAI) to perform pattern analysis, such as predicting departure times or home occupancy.
 
 🚀 Features
