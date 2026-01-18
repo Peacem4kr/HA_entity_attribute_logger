@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Select Entities",
+        "data": {
+          "entities": "Entities to track",
+          "retention_days": "Storage duration (days)",
+          "import_history": "Import Home assistant history"
+        }
+      },
+      "attributes": {
+        "title": "Select Data points",
+        "data": {
+          "selected_attributes": "Attribute + example (better examples if entity is on)"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Adjust Data Selection",
+        "data": {
+          "selected_attributes": "Attribute + example (better examples if entity is on)",
+          "import_history": "Sync missing history now"
+        }
+      }
+    }
+  }
+}

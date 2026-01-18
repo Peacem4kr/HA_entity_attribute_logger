@@ -1,0 +1,18 @@
+get_history:
+  description: "Retrieve the stored history for a specific entity to use for analysis."
+  fields:
+    entity_id:
+      description: "The entity_id of the device you want to get the history for."
+      example: "light.living_room"
+      required: true
+      selector:
+        entity:
+    limit:
+      description: "The number of recent data points to return."
+      example: 50
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 1000
+          mode: box
