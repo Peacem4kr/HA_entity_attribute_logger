@@ -180,7 +180,6 @@ entity_attribute_logger/
 ├── __init__.py          # Core integration logic
 ├── manifest.json        # Metadata and domain definition
 ├── icons.json           # MDI Icon mapping
-├── logo.png             # Integration dashboard logo
 └── translations/
     └── en.json          # UI text strings
 ```
