@@ -72,17 +72,18 @@ shell_command:
 #### 3. Add automation
 This automation triggers the AI analysis (e.g., when you put your phone on the charger in the evening), asks for confirmation via your Voice Satellite, and sets the helper.
 
-
-Trigger: Phone starts charging after 19:00.
-AI Task: Read the history file and predict a departure time for tomorrow.
-Voice Question 1: "Shall I pre-heat the car tomorrow at [AI Time]?"
-  If YES: Save [AI Time] to the helper. Done.
-  If NO: Ask Question 2.
-Voice Question 2: "Would you like to set a different time?"
-  If YES: Ask Question 3.
-  If NO: Do nothing. Done.
-Voice Question 3: "At what time are you leaving?"
-Answer: User speaks a time (e.g., "08:30").
+**The Workflow:**
+* **Trigger:** Phone starts charging after 19:00.
+* **AI Task:** Read the history file and predict a departure time for tomorrow.
+* **Voice Question 1:** *"Shall I pre-heat the car tomorrow at [AI Time]?"*
+    * **IF YES:** Save [AI Time] to the helper. **Done.**
+    * **IF NO:** Move to Question 2.
+* **Voice Question 2:** *"Would you like to set a different time?"*
+    * **IF YES:** Move to Question 3.
+    * **IF NO:** Do nothing. **Done.**
+* **Voice Question 3:** *"At what time are you leaving?"*
+    * **User Answer:** Speak a time (e.g., "08:30").
+    * **Final Action:** Save user's spoken time to the helper. **Done.**
 
 Action: Save user's time to the helper. Done.
 ```yaml
