@@ -10,7 +10,7 @@ While Home Assistant's internal database (Recorder) eventually purges old data, 
 
 ## 🚀 Key Features
 
-- **Persistent Long-Term History**: Create a permanent log for specific entities that survives Home Assistant database purges.
+- **Persistent Long-Term History**: Create a permanent log for specific entities or attribute(s) that survives Home Assistant database purges.
 - **Deep Attribute Logging**: Every state change triggers a log entry containing the state AND all associated attributes (e.g., GPS coordinates, battery level, or climate presets).
 - **Customizable Retention**: You decide how long the data stays. Choose between keeping everything forever or setting a specific number of days to keep your storage clean.
 - **AI-Ready JSON**: Data is stored in a chronological JSON structure, making it "plug-and-play" for AI pattern analysis.
