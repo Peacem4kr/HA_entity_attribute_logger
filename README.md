@@ -176,10 +176,14 @@ actions:
 ```
 #### 5. 📂 Directory Structure
 ```yaml
-entity_attribute_logger/
+custom_components/entity_attribute_logger/
 ├── __init__.py          # Core integration logic
 ├── manifest.json        # Metadata and domain definition
 ├── icons.json           # MDI Icon mapping
 └── translations/
     └── en.json          # UI text strings
+
+
+config/www/entity_and_attribute_logger/
+└── filename.json        # Unique logfile per entry
 ```
