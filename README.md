@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Entity & Attribute Logger** is a custom integration for Home Assistant designed to solve a specific problem: keeping a detailed, long-term history of state changes and attributes for one or more entities in a format that is easy to process.
+The **Entity & Attribute Logger** is a custom integration for Home Assistant designed to solve a specific problem: keeping a detailed, long-term history of state changes for one or more entities or attributesin in a format that is easy to process.
 
 While Home Assistant's internal database (Recorder) eventually purges old data, this integration allows you to build an indefinite, human-readable (JSON) log of an entity's behavior. This makes it the perfect bridge for deep-data analysis and feeding historical patterns into Local LLMs (like Google Gemma or OpenAI).
 
