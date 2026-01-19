@@ -107,7 +107,7 @@ actions:
       entity_id: ai_task.gemma3_12b_task
       task_name: "Predict Departure"
       instructions: >
-        Je bent een patroon-analist. Je krijgt JSON data van de locatie van Bjorn.
+        Je bent een patroon-analist. Je krijgt JSON data van de locatie van Person.
         Voorspel de meest waarschijnlijke VERTREKTIJD voor morgenochtend {{ (now() + timedelta(days=1)).strftime('%A %d %B') }}
         Antwoord ENKEL met de tijd in HH:MM formaat (bijv. 07:15). Geen extra tekst!
         Hier is de data die je moet analyseren: {{ log_data.stdout }}
