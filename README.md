@@ -74,16 +74,17 @@ This automation triggers the AI analysis (e.g., when you put your phone on the c
 
 **The Workflow:**
 * **Trigger:** Phone starts charging after 19:00.
-* **AI Task:** Read the history file and predict a departure time for tomorrow.
+* **AI Task 1:** Read history file -> Predict departure time.
 * **Voice Question 1:** *"Shall I pre-heat the car tomorrow at [AI Time]?"*
-    * **IF YES:** Save [AI Time] to the helper. **Done.**
-    * **IF NO:** Move to Question 2.
+    * **IF YES:** Save [AI Time] to helper. **Done.**
+    * **IF NO:** Ask Question 2.
 * **Voice Question 2:** *"Would you like to set a different time?"*
-    * **IF YES:** Move to Question 3.
+    * **IF YES:** Ask Question 3.
     * **IF NO:** Do nothing. **Done.**
 * **Voice Question 3:** *"At what time are you leaving?"*
-    * **User Answer:** Speak a time (e.g., "08:30").
-    * **Final Action:** Save user's spoken time to the helper. **Done.**
+    * **User Answer:** Speaks a time (e.g., "Seven hours five" or "Quarter past eight").
+    * **AI Task 2:** Converts speech to strict `HH:MM` format.
+    * **Final Action:** Save formatted time to helper. **Done.**
 
 Action: Save user's time to the helper. Done.
 ```yaml
@@ -99,25 +100,28 @@ conditions:
 actions:
   - action: shell_command.get_location_history
     response_variable: log_data
+    data: {}
   - action: ai_task.generate_data
+    metadata: {}
     data:
       entity_id: ai_task.gemma3_12b_task
       task_name: "Predict Departure"
       instructions: >
-        You are a pattern analyst. Analyze the provided JSON data of the user's location.
-        Predict the most likely DEPARTURE TIME for tomorrow morning {{ (now() + timedelta(days=1)).strftime('%A %d %B') }}.
-        Answer ONLY with the time in HH:MM format (e.g. 07:15). No extra text!
-        Data: {{ log_data.stdout }}
-    response_variable: ai_output
+        Je bent een patroon-analist. Je krijgt JSON data van de locatie van Bjorn.
+        Voorspel de meest waarschijnlijke VERTREKTIJD voor morgenochtend {{ (now() + timedelta(days=1)).strftime('%A %d %B') }}
+        Antwoord ENKEL met de tijd in HH:MM formaat (bijv. 07:15). Geen extra tekst!
+        Hier is de data die je moet analyseren: {{ log_data.stdout }}
+    response_variable: opwarmen_ai_output
   - action: assist_satellite.ask_question
     data:
-      question: "Shall I pre-heat the car tomorrow at {{ ai_output.data | trim }}?"
-      entity_id: assist_satellite.your_voice_satellite
+      question: >-
+        Zal ik de auto morgen voorverwarmen voor {{ opwarmen_ai_output.data | trim }}?
+      entity_id: assist_satellite.home_assistant_voice_091c68_assist_satellite
       answers:
         - id: "yes"
-          sentences: ["yes", "sure", "do it"]
+          sentences: ["ja", "oke", "doe maar"]
         - id: "no"
-          sentences: ["no", "different time", "not now"]
+          sentences: ["nee", "ander tijdstip", "liever niet"]
     response_variable: first_answer
   - choose:
       - conditions:
@@ -126,9 +130,9 @@ actions:
         sequence:
           - action: input_datetime.set_datetime
             target:
-              entity_id: input_datetime.car_heating_ai_time
+              entity_id: input_datetime.volvo_opwarmen_ai_antwoord
             data:
-              time: "{{ ai_output.data | trim }}"
+              time: "{{ opwarmen_ai_output.data | trim }}"
               date: "{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
       - conditions:
           - condition: template
@@ -136,11 +140,13 @@ actions:
         sequence:
           - action: assist_satellite.ask_question
             data:
-              question: "Would you like to set a different time?"
-              entity_id: assist_satellite.your_voice_satellite
+              question: "Wil je een ander tijdstip voor morgen instellen?"
+              entity_id: assist_satellite.home_assistant_voice_091c68_assist_satellite
               answers:
                 - id: "new_time"
-                  sentences: ["yes", "set time"]
+                  sentences: ["ja", "stel in"]
+                - id: "cancel"
+                  sentences: ["nee", "laat maar"]
             response_variable: second_answer
           - choose:
               - conditions:
@@ -149,14 +155,29 @@ actions:
                 sequence:
                   - action: assist_satellite.ask_question
                     data:
-                      question: "At what time are you leaving?"
-                      entity_id: assist_satellite.your_voice_satellite
-                    response_variable: manual_time
+                      question: "Welk uur vertrek je?"
+                      entity_id: assist_satellite.home_assistant_voice_091c68_assist_satellite
+                    # Listen for the vague voice command
+                    response_variable: manual_voice_response
+                  
+                  # --- NEW STEP: AI Formats the voice input ---
+                  - action: ai_task.generate_data
+                    data:
+                      entity_id: ai_task.gemma3_12b_task
+                      task_name: "Tijd formatteren"
+                      instructions: >
+                        De gebruiker zei: "{{ manual_voice_response.sentences[0] }}".
+                        Zet dit om naar een tijdformaat HH:MM. 
+                        Antwoord ALLEEN met de tijd (bijv. 08:30). 
+                        Als het onduidelijk is, gok dan op basis van de meest logische ochtendtijd.
+                    response_variable: formatted_time_output
+
                   - action: input_datetime.set_datetime
                     target:
-                      entity_id: input_datetime.car_heating_ai_time
+                      entity_id: input_datetime.volvo_opwarmen_ai_antwoord
                     data:
-                      time: "{{ manual_time.sentences[0] | trim }}"
+                      # Uses the AI formatted time
+                      time: "{{ formatted_time_output.data | trim }}"
                       date: "{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
 mode: single
 ```
