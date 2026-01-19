@@ -81,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry):
             except:
                 history_list = []
 
-        ts_iso = timestamp.isoformat()
+        ts_iso = local_time.isoformat()
         existing_record = next(
             (d for d in history_list if d["ts"] == ts_iso and d["data"].get("entity_id") == eid), 
             None
@@ -164,4 +164,5 @@ async def async_reload_entry(hass: HomeAssistant, entry):
     await hass.config_entries.async_reload(entry.entry_id)
 
 async def async_unload_entry(hass: HomeAssistant, entry):
+
     return await hass.config_entries.async_unload_platforms(entry, [])
