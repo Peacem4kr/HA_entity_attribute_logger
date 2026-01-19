@@ -88,8 +88,8 @@ This automation triggers the AI analysis (e.g., when you put your phone on the c
 
 Action: Save user's time to the helper. Done.
 ```yaml
-alias: "Car Pre-heating via AI Pattern Analysis"
-description: "Analyzes patterns and plans car climate via Gemma3"
+alias: "AI-Driven Climate Control"
+description: "Analyzes patterns from the logger and sets climate start time via voice confirmation."
 triggers:
   - trigger: state
     entity_id: sensor.phone_battery_state
@@ -100,28 +100,25 @@ conditions:
 actions:
   - action: shell_command.get_location_history
     response_variable: log_data
-    data: {}
   - action: ai_task.generate_data
-    metadata: {}
     data:
-      entity_id: ai_task.gemma3_12b_task
+      entity_id: ai_task.your_llm_model
       task_name: "Predict Departure"
       instructions: >
-        Je bent een patroon-analist. Je krijgt JSON data van de locatie van Person.
-        Voorspel de meest waarschijnlijke VERTREKTIJD voor morgenochtend {{ (now() + timedelta(days=1)).strftime('%A %d %B') }}
-        Antwoord ENKEL met de tijd in HH:MM formaat (bijv. 07:15). Geen extra tekst!
-        Hier is de data die je moet analyseren: {{ log_data.stdout }}
-    response_variable: opwarmen_ai_output
+        You are a pattern analyst. Analyze the provided JSON data of the user's location history.
+        Predict the most likely DEPARTURE TIME for tomorrow morning {{ (now() + timedelta(days=1)).strftime('%A %d %B') }}.
+        Answer ONLY with the time in HH:MM format (e.g., 07:15). No extra text!
+        Data: {{ log_data.stdout }}
+    response_variable: ai_prediction
   - action: assist_satellite.ask_question
     data:
-      question: >-
-        Zal ik de auto morgen voorverwarmen voor {{ opwarmen_ai_output.data | trim }}?
-      entity_id: assist_satellite.home_assistant_voice_091c68_assist_satellite
+      question: "Shall I prepare the car tomorrow for {{ ai_prediction.data | trim }}?"
+      entity_id: assist_satellite.your_voice_satellite
       answers:
         - id: "yes"
-          sentences: ["ja", "oke", "doe maar"]
+          sentences: ["yes", "sure", "do it"]
         - id: "no"
-          sentences: ["nee", "ander tijdstip", "liever niet"]
+          sentences: ["no", "different time", "not now"]
     response_variable: first_answer
   - choose:
       - conditions:
@@ -130,9 +127,9 @@ actions:
         sequence:
           - action: input_datetime.set_datetime
             target:
-              entity_id: input_datetime.volvo_opwarmen_ai_antwoord
+              entity_id: input_datetime.climate_start_time
             data:
-              time: "{{ opwarmen_ai_output.data | trim }}"
+              time: "{{ ai_prediction.data | trim }}"
               date: "{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
       - conditions:
           - condition: template
@@ -140,13 +137,12 @@ actions:
         sequence:
           - action: assist_satellite.ask_question
             data:
-              question: "Wil je een ander tijdstip voor morgen instellen?"
-              entity_id: assist_satellite.home_assistant_voice_091c68_assist_satellite
+              question: "Would you like to set a different time?"
+              entity_id: assist_satellite.your_voice_satellite
               answers:
                 - id: "new_time"
-                  sentences: ["ja", "stel in"]
-                - id: "cancel"
-                  sentences: ["nee", "laat maar"]
+                  sentences: ["yes", "set time"]
+            # No id for 'no' here to simply end the automation if they say no
             response_variable: second_answer
           - choose:
               - conditions:
@@ -155,29 +151,25 @@ actions:
                 sequence:
                   - action: assist_satellite.ask_question
                     data:
-                      question: "Welk uur vertrek je?"
-                      entity_id: assist_satellite.home_assistant_voice_091c68_assist_satellite
-                    # Listen for the vague voice command
+                      question: "At what time are you leaving?"
+                      entity_id: assist_satellite.your_voice_satellite
                     response_variable: manual_voice_response
-                  
-                  # --- NEW STEP: AI Formats the voice input ---
+
                   - action: ai_task.generate_data
                     data:
-                      entity_id: ai_task.gemma3_12b_task
-                      task_name: "Tijd formatteren"
+                      entity_id: ai_task.your_llm_model
+                      task_name: "Format Time"
                       instructions: >
-                        De gebruiker zei: "{{ manual_voice_response.sentences[0] }}".
-                        Zet dit om naar een tijdformaat HH:MM. 
-                        Antwoord ALLEEN met de tijd (bijv. 08:30). 
-                        Als het onduidelijk is, gok dan op basis van de meest logische ochtendtijd.
-                    response_variable: formatted_time_output
-
+                        The user said: "{{ manual_voice_response.sentences[0] }}".
+                        Convert this to a strict HH:MM time format (e.g., 07:15).
+                        Answer ONLY with the time. No extra text.
+                    response_variable: formatted_time
+                    
                   - action: input_datetime.set_datetime
                     target:
-                      entity_id: input_datetime.volvo_opwarmen_ai_antwoord
+                      entity_id: input_datetime.climate_start_time
                     data:
-                      # Uses the AI formatted time
-                      time: "{{ formatted_time_output.data | trim }}"
+                      time: "{{ formatted_time.data | trim }}"
                       date: "{{ (now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
 mode: single
 ```
@@ -185,9 +177,10 @@ mode: single
 Finally, create a simple automation that triggers when the time in your helper is reached:
 ```yaml
 alias: "Start Car Heating"
+description: "Triggers the car climate control at the time determined by the AI."
 triggers:
   - trigger: time
-    at: input_datetime.car_heating_ai_time
+    at: input_datetime.climate_start_time
 actions:
   - action: climate.set_hvac_mode
     target:
